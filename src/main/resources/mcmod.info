@@ -2,14 +2,11 @@
 {
   "modid": "${modid}",
   "name": "${modname}",
-  "description": "",
+  "description": "Port the old mods and backport the new mods to 1.12.2",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
-  "updateUrl": "",
-  "authorList": [],
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
+  "authorList": ["Surreal"],
+  "dependencies": ["mixinbooter"]
 }
 ]

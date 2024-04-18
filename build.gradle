@@ -44,10 +44,6 @@ minecraft {
     // injectedTags.put('MOD_VERSION', project.version)
 }
 
-tasks.injectTags.configure {
-    outputClassName.set("${project.group}.${project.archives_base_name}.Tags")
-}
-
 apply from: 'dependencies.gradle'
 
 // Adds Access Transformer files to tasks
