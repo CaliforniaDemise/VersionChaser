@@ -1,0 +1,14 @@
+repositories {
+    maven {
+        name 'CurseMaven'
+        url 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
+    mavenLocal() // Must be last for caching to work
+}
+
+dependencies {
+
+}
