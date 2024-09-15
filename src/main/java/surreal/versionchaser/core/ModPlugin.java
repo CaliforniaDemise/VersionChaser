@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import surreal.versionchaser.core.v1710.Patcher1710;
+import surreal.versionchaser.asm.Patcher;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -73,7 +73,7 @@ public class ModPlugin implements IFMLLoadingPlugin {
                 if (file.isFile() && !fileName.endsWith("-chased.jar") && !fileName.endsWith("-chased.zip")) {
                     ZipFile modFile = new ZipFile(file);
                     JsonObject modInfo = readInfoStream(modFile.getInputStream(modFile.getEntry("mcmod.info")));
-                    patch(modInfo.get("mcversion").getAsString(), file, modFile);
+                    Patcher.patch(file, modFile, modInfo.get("mcversion").getAsString());
                     modFile.close();
                 }
             }
@@ -83,13 +83,6 @@ public class ModPlugin implements IFMLLoadingPlugin {
         }
         catch (IOException e) {
             LOGGER.error("Could not stream mods directory");
-        }
-    }
-
-    private static void patch(String version, File file, ZipFile zipFile) {
-        switch (version) {
-            default: return;
-            case "1.7.10": Patcher1710.patch(file, zipFile); break;
         }
     }
 

@@ -1,9 +1,10 @@
-package surreal.versionchaser.core.v1710;
+package surreal.versionchaser.asm;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import surreal.versionchaser.asm.Helper;
-import surreal.versionchaser.core.v1710.asm.ClassVisitor1710;
+import surreal.versionchaser.core.visitors.ClassVisitor1710;
+import surreal.versionchaser.core.visitors.ClassVisitor189;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -15,9 +16,12 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class Patcher1710 {
+public class Patcher {
 
-    public static void patch(File file, ZipFile zipFile) {
+    public static void patch(File file, ZipFile zipFile, String mcVersion) {
+        ClassVisitor visitor = getVisitor(mcVersion);
+        if (visitor == null) return;
+
         List<ZipEntry> entries = zipFile.stream().filter(entry -> !entry.isDirectory()).collect(Collectors.toList());
 
         String name = file.getAbsolutePath();
@@ -29,13 +33,12 @@ public class Patcher1710 {
                 InputStream stream = zipFile.getInputStream(entry);
 
                 if (entry.getName().endsWith(".class")) {
+
                     ClassReader reader = new ClassReader(stream);
 
-                    ClassVisitor1710 visitor = new ClassVisitor1710();
                     reader.accept(visitor, 0);
 
-                    ClassWriter writer = new ClassWriter(0);
-                    visitor.accept(writer);
+                    ClassWriter writer = new ClassWriter(reader, 0);
 
                     File classOut = new File(file.getParentFile().getParentFile(), "classOutputs/" + entry.getName());
                     Helper.writeClassToFile(classOut, writer);
@@ -60,5 +63,14 @@ public class Patcher1710 {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static ClassVisitor getVisitor(String mcVersion) {
+        switch (mcVersion) {
+            case "1.7.10": return new ClassVisitor1710();
+            case "1.8.9": return new ClassVisitor189();
+        }
+
+        return null;
     }
 }
