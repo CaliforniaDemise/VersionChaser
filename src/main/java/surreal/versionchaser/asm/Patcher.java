@@ -4,8 +4,8 @@ import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
-import surreal.versionchaser.core.visitors.ClassVisitor1710;
-import surreal.versionchaser.core.visitors.ClassVisitor189;
+import surreal.versionchaser.core.transformers.ClassVisitor1710;
+import surreal.versionchaser.core.transformers.ClassVisitor189;
 
 import java.io.*;
 import java.nio.file.Files;

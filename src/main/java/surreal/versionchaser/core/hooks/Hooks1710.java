@@ -1,4 +1,4 @@
-package surreal.versionchaser.core;
+package surreal.versionchaser.core.hooks;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
@@ -8,9 +8,10 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
-public class VCHooks {
+@SuppressWarnings("unused")
+public class Hooks1710 {
 
-    public static void GameRegistry$addShapelessRecipe1710(ItemStack output, Object[] inputs) {
+    public static void GameRegistry$addShapelessRecipe(ItemStack output, Object[] inputs) {
         ModContainer container = Loader.instance().activeModContainer();
         String modId;
         if (container != null) modId = container.getModId();

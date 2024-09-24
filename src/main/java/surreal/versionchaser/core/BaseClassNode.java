@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 public abstract class BaseClassNode extends ClassNode implements Opcodes {
@@ -39,6 +40,8 @@ public abstract class BaseClassNode extends ClassNode implements Opcodes {
         return mn;
     }
 
+    protected abstract String getHookClass();
+
     // Default getters
     protected String getOwner(String owner) { return owner; }
     protected String getDesc(String desc) { return desc; }
@@ -54,6 +57,10 @@ public abstract class BaseClassNode extends ClassNode implements Opcodes {
 
     // Fields
     protected String getFieldDesc(String desc) { return this.getDesc(desc); }
+
+    // Insns
+    @Nullable
+    protected String getHookMethod(String owner, String name, String desc) { return null; }
 
     public static class AnnotationReplacement extends AnnotationNode {
 
@@ -101,6 +108,13 @@ public abstract class BaseClassNode extends ClassNode implements Opcodes {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+            String hook = this.node.getHookMethod(owner, name, desc);
+            if (hook != null) {
+                owner = this.node.getHookClass();
+                name = hook;
+                super.visitMethodInsn(opcode, owner, name, desc, itf);
+                return;
+            }
             super.visitMethodInsn(opcode, this.node.getMethodOwner(owner), name, this.node.getMethodDesc(desc), itf);
         }
     }
