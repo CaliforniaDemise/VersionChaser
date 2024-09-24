@@ -2,7 +2,6 @@ package surreal.versionchaser.asm;
 
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import surreal.versionchaser.core.visitors.ClassVisitor1710;
@@ -31,7 +30,11 @@ public class Patcher {
         String name = file.getAbsolutePath();
 
         try {
-            JarOutputStream jos = new JarOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(name.subSequence(0, name.length() - 4) + "-chased.jar"))));
+            JarOutputStream jos;
+            if (name.endsWith(".disabled")) {
+                jos = new JarOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(name.subSequence(0, name.length() - 13) + "-chased.jar"))));
+            }
+            else jos = new JarOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(name.subSequence(0, name.length() - 4) + "-chased.jar"))));
 
             for (ZipEntry entry : entries) {
                 InputStream stream = zipFile.getInputStream(entry);

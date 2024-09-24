@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -71,14 +72,21 @@ public class VCModPlugin implements IFMLLoadingPlugin {
             for (Path path : stream) {
                 File file = path.toFile();
                 String fileName = file.getName();
-
-                if (file.isFile() && fileName.endsWith(".jar") && !fileName.endsWith("-chased.jar") && !fileName.endsWith("-chased.zip")) {
-                    ZipFile modFile = new ZipFile(file);
-                    JsonObject modInfo = readInfoStream(modFile.getInputStream(modFile.getEntry("mcmod.info")));
-                    Patcher.patch(file, modFile, modInfo.get("mcversion").getAsString());
-                    modFile.close();
-                    IOUtils.copy(Files.newInputStream(file.toPath()), Files.newOutputStream(Paths.get(file.getAbsolutePath() + ".disabled")));
-                    file.delete();
+                if (file.isFile() && !fileName.contains("-chased")) {
+                    if (fileName.endsWith(".zip") || fileName.endsWith(".jar")) {
+                        ZipFile modFile = new ZipFile(file);
+                        JsonObject modInfo = readInfoStream(modFile.getInputStream(modFile.getEntry("mcmod.info")));
+                        Patcher.patch(file, modFile, modInfo.get("mcversion").getAsString());
+                        modFile.close();
+                        IOUtils.copy(Files.newInputStream(file.toPath()), Files.newOutputStream(Paths.get(file.getAbsolutePath() + ".disabled")));
+                        file.delete();
+                    }
+                    else if (FMLLaunchHandler.isDeobfuscatedEnvironment() && fileName.endsWith(".disabled")) {
+                        ZipFile modFile = new ZipFile(file);
+                        JsonObject modInfo = readInfoStream(modFile.getInputStream(modFile.getEntry("mcmod.info")));
+                        Patcher.patch(file, modFile, modInfo.get("mcversion").getAsString());
+                        modFile.close();
+                    }
                 }
             }
 
