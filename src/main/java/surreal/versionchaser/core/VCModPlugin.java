@@ -26,12 +26,12 @@ import java.util.zip.ZipFile;
 @IFMLLoadingPlugin.Name("VersionChaser")
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.SortingIndex(Integer.MIN_VALUE)
-public class ModPlugin implements IFMLLoadingPlugin {
+public class VCModPlugin implements IFMLLoadingPlugin {
 
     public static final Logger LOGGER = LogManager.getLogger("VersionChaser");
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
-    public ModPlugin() {
+    public VCModPlugin() {
         // Handle it here
         File mods = new File("mods"); // <instance>/mods
         streamMods(mods);
@@ -39,7 +39,7 @@ public class ModPlugin implements IFMLLoadingPlugin {
 
     @Override
     public String getModContainerClass() {
-        return "surreal.versionchaser.core.ModPlugin$Container";
+        return "surreal.versionchaser.core.VCModPlugin$Container";
     }
 
     @Override
@@ -97,7 +97,7 @@ public class ModPlugin implements IFMLLoadingPlugin {
         }
 
         private static void readInfoFile(ModMetadata metadata) {
-            InputStream stream = ModPlugin.class.getResourceAsStream("/mcmod.info");
+            InputStream stream = VCModPlugin.class.getResourceAsStream("/mcmod.info");
             if (stream == null) {
                 LOGGER.error("Could not read mcmod.info");
                 return;

@@ -3,6 +3,7 @@ package surreal.versionchaser.asm;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 import surreal.versionchaser.core.visitors.ClassVisitor1710;
 import surreal.versionchaser.core.visitors.ClassVisitor189;
 
@@ -19,7 +20,7 @@ import java.util.zip.ZipFile;
 public class Patcher {
 
     public static void patch(File file, ZipFile zipFile, String mcVersion) {
-        ClassVisitor visitor = getVisitor(mcVersion);
+        ClassNode visitor = getVisitor(mcVersion);
         if (visitor == null) return;
 
         List<ZipEntry> entries = zipFile.stream().filter(entry -> !entry.isDirectory()).collect(Collectors.toList());
@@ -35,10 +36,9 @@ public class Patcher {
                 if (entry.getName().endsWith(".class")) {
 
                     ClassReader reader = new ClassReader(stream);
-
                     reader.accept(visitor, 0);
-
                     ClassWriter writer = new ClassWriter(reader, 0);
+                    visitor.accept(writer);
 
                     File classOut = new File(file.getParentFile().getParentFile(), "classOutputs/" + entry.getName());
                     Helper.writeClassToFile(classOut, writer);
@@ -56,6 +56,8 @@ public class Patcher {
                     }
                     jos.closeEntry();
                 }
+
+                stream.close();
             }
 
             jos.close();
@@ -65,7 +67,7 @@ public class Patcher {
         }
     }
 
-    private static ClassVisitor getVisitor(String mcVersion) {
+    private static ClassNode getVisitor(String mcVersion) {
         switch (mcVersion) {
             case "1.7.10": return new ClassVisitor1710();
             case "1.8.9": return new ClassVisitor189();

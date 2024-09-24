@@ -1,12 +1,19 @@
 package surreal.versionchaser.core.visitors;
 
-import org.objectweb.asm.ClassVisitor;
+import surreal.versionchaser.core.BaseClassNode;
 
-import static org.objectweb.asm.Opcodes.*;
+public class ClassVisitor1710 extends BaseClassNode {
 
-public class ClassVisitor1710 extends ClassVisitor {
+    public ClassVisitor1710() {}
 
-    public ClassVisitor1710() {
-        super(ASM5);
+    @Override
+    protected String getDesc(String desc) {
+        desc = super.getDesc(desc);
+        String cpw = "Lcpw/mods";
+        String forge = "Lnet/minecraftforge";
+        if (desc.startsWith(cpw)) {
+            return desc.replace(cpw, forge);
+        }
+        return desc;
     }
 }
