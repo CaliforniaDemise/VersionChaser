@@ -1,5 +1,6 @@
 package surreal.versionchaser.asm;
 
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -20,8 +21,10 @@ import java.util.zip.ZipFile;
 public class Patcher {
 
     public static void patch(File file, ZipFile zipFile, String mcVersion) {
-        ClassNode visitor = getVisitor(mcVersion);
-        if (visitor == null) return;
+        ClassNode cls = getVisitor(mcVersion);
+        if (cls == null) return;
+
+        boolean deobf = FMLLaunchHandler.isDeobfuscatedEnvironment();
 
         List<ZipEntry> entries = zipFile.stream().filter(entry -> !entry.isDirectory()).collect(Collectors.toList());
 
@@ -32,16 +35,16 @@ public class Patcher {
 
             for (ZipEntry entry : entries) {
                 InputStream stream = zipFile.getInputStream(entry);
-
                 if (entry.getName().endsWith(".class")) {
-
                     ClassReader reader = new ClassReader(stream);
-                    reader.accept(visitor, 0);
-                    ClassWriter writer = new ClassWriter(reader, 0);
-                    visitor.accept(writer);
+                    reader.accept(cls, 0);
+                    ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+                    cls.accept(writer);
 
-                    File classOut = new File(file.getParentFile().getParentFile(), "classOutputs/" + entry.getName());
-                    Helper.writeClassToFile(classOut, writer);
+                    if (deobf) {
+                        File classOut = new File(file.getParentFile().getParentFile(), "classOutputs/" + entry.getName());
+                        Helper.writeClassToFile(classOut, writer);
+                    }
 
                     jos.putNextEntry(new JarEntry(entry.getName()));
                     jos.write(writer.toByteArray());

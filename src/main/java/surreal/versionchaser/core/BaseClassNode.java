@@ -34,19 +34,19 @@ public abstract class BaseClassNode extends ClassNode implements BaseTransformer
         return an;
     }
 
-    @Override
-    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        FieldNode field = (FieldNode) super.visitField(access, name, desc, signature, value);
-        field.desc = this.getDesc(field, desc);
-        return field;
-    }
-
-    @Override
-    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        MethodNode method = (MethodNode) super.visitMethod(access, name, desc, signature, exceptions);
-        method.desc = this.getDesc(method, name);
-        return method;
-    }
+//    @Override
+//    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+//        FieldNode field = (FieldNode) super.visitField(access, name, desc, signature, value);
+//        field.desc = this.getDesc(field, desc);
+//        return field;
+//    }
+//
+//    @Override
+//    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+//        MethodNode method = (MethodNode) super.visitMethod(access, name, desc, signature, exceptions);
+//        method.desc = this.getDesc(method, name);
+//        return method;
+//    }
 
     // Default getters
     protected String getDesc(String desc) { return desc; }

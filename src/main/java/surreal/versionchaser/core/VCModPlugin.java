@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import surreal.versionchaser.asm.Patcher;
@@ -18,6 +19,7 @@ import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -70,11 +72,13 @@ public class VCModPlugin implements IFMLLoadingPlugin {
                 File file = path.toFile();
                 String fileName = file.getName();
 
-                if (file.isFile() && !fileName.endsWith("-chased.jar") && !fileName.endsWith("-chased.zip")) {
+                if (file.isFile() && fileName.endsWith(".jar") && !fileName.endsWith("-chased.jar") && !fileName.endsWith("-chased.zip")) {
                     ZipFile modFile = new ZipFile(file);
                     JsonObject modInfo = readInfoStream(modFile.getInputStream(modFile.getEntry("mcmod.info")));
                     Patcher.patch(file, modFile, modInfo.get("mcversion").getAsString());
                     modFile.close();
+                    IOUtils.copy(Files.newInputStream(file.toPath()), Files.newOutputStream(Paths.get(file.getAbsolutePath() + ".disabled")));
+                    file.delete();
                 }
             }
 
