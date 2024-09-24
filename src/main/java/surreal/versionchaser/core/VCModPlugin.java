@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 @SuppressWarnings("unused")
@@ -75,7 +76,15 @@ public class VCModPlugin implements IFMLLoadingPlugin {
                 if (file.isFile() && !fileName.contains("-chased")) {
                     if (fileName.endsWith(".zip") || fileName.endsWith(".jar")) {
                         ZipFile modFile = new ZipFile(file);
-                        JsonObject modInfo = readInfoStream(modFile.getInputStream(modFile.getEntry("mcmod.info")));
+                        ZipEntry entry = modFile.getEntry("mcmod.info");
+                        if (entry == null) { // TODO A fallback
+                            LOGGER.error("{} doesn't have mcmod.info file. If this mod isn't a 1.12.2 mod the game is most likely to crash.", fileName);
+                            continue;
+                        }
+                        JsonObject modInfo = readInfoStream(modFile.getInputStream(entry));
+                        if (!modInfo.has("mcversion")) {
+                            LOGGER.error("{} didn't set mcversion property in mcmod.info, skipping. If this mod isn't a 1.12.2 mod the game is most likely to crash.", fileName);
+                        }
                         Patcher.patch(file, modFile, modInfo.get("mcversion").getAsString());
                         modFile.close();
                         IOUtils.copy(Files.newInputStream(file.toPath()), Files.newOutputStream(Paths.get(file.getAbsolutePath() + ".disabled")));
