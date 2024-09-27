@@ -5,17 +5,27 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraftforge.fml.common.DummyModContainer;
-import net.minecraftforge.fml.common.LoadController;
-import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.resources.FolderResourcePack;
+import net.minecraft.client.resources.data.IMetadataSection;
+import net.minecraft.client.resources.data.MetadataSerializer;
+import net.minecraft.launchwrapper.Launch;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.*;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import surreal.versionchaser.asm.Patcher;
+import surreal.versionchaser.core.hooks.Hooks1710;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -23,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -138,7 +149,53 @@ public class VCModPlugin implements IFMLLoadingPlugin {
         @SuppressWarnings("UnstableApiUsage")
         public boolean registerBus(EventBus bus, LoadController controller) {
             bus.register(this);
+            MinecraftForge.EVENT_BUS.register(this);
             return true;
+        }
+
+        @Override
+        public Class<?> getCustomResourcePackClass() {
+            return VCResourcePack.class;
+        }
+
+        @SubscribeEvent
+        public void registerModels(ModelRegistryEvent event) {
+            Hooks1710.ITEMS.forEach(item -> {
+                ModelResourceLocation location = new ModelResourceLocation(Objects.requireNonNull(item.getRegistryName()), "inventory");
+                ModelLoader.setCustomMeshDefinition(item, i -> location);
+            });
+        }
+    }
+
+    public static class VCResourcePack extends FolderResourcePack implements FMLContainerHolder {
+
+        private final ModContainer container;
+
+        public VCResourcePack(ModContainer container) {
+            super(new File(Launch.minecraftHome, ".vchaser_assets"));
+            this.container = container;
+        }
+
+        @Override
+        public ModContainer getFMLContainer() {
+            return this.container;
+        }
+
+        @Nonnull
+        @Override
+        public String getPackName() {
+            return "ResourceChaser";
+        }
+
+        @Override
+        @ParametersAreNonnullByDefault
+        public <T extends IMetadataSection> T getPackMetadata(MetadataSerializer metadataSerializer, String metadataSectionName) throws IOException {
+            JsonObject metadata = new JsonObject();
+            JsonObject packObj = new JsonObject();
+            metadata.add("pack", packObj);
+            packObj.addProperty("description", "Includes assets moved by VersionChaser.");
+            packObj.addProperty("pack_format", 2);
+            return metadataSerializer.parseMetadataSection(metadataSectionName, metadata);
         }
     }
 }

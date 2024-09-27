@@ -52,6 +52,8 @@ public class Patcher {
                     jos.putNextEntry(new JarEntry(entry.getName()));
                     jos.write(writer.toByteArray());
                     jos.closeEntry();
+
+                    cls = getVisitor(mcVersion);
                 }
                 else {
                     jos.putNextEntry(new JarEntry(entry.getName()));
